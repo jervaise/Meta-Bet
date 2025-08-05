@@ -710,9 +710,108 @@ function updateStats() {
 // Update all results
 function updateResults() {
   updateTierListResults();
+  updatePlayerTierLists();
 }
 
+// Update individual player tier lists
+function updatePlayerTierLists() {
+  const container = document.getElementById('playerTierLists');
+  container.innerHTML = '';
 
+  const players = Object.values(gameData.users).filter(user => {
+    return user.predictions && Object.keys(user.predictions).length > 0;
+  });
+
+  if (players.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No tier lists submitted yet. Be the first to create one!</p>';
+    return;
+  }
+
+  players.forEach(player => {
+    const playerCard = document.createElement('div');
+    playerCard.className = 'player-tierlist-card';
+
+    // Count submitted categories
+    const submittedCategories = Object.keys(player.predictions || {});
+    const totalCategories = ['dps', 'tank', 'healer'].length;
+
+    const playerHeader = document.createElement('div');
+    playerHeader.className = 'player-tierlist-header';
+    playerHeader.innerHTML = `
+      <div class="player-name-large">${player.name}</div>
+      <div class="player-stats">
+        <span>${submittedCategories.length}/${totalCategories} categories</span>
+        <span>Joined ${new Date(player.joinDate).toLocaleDateString()}</span>
+      </div>
+    `;
+
+    const playerContent = document.createElement('div');
+    playerContent.className = 'player-tierlist-content';
+
+    // Display each category's tier list
+    ['dps', 'tank', 'healer'].forEach(category => {
+      const categoryDiv = document.createElement('div');
+      categoryDiv.className = 'player-category-tierlist';
+
+      const categoryHeader = document.createElement('div');
+      categoryHeader.className = 'player-category-header';
+      categoryHeader.textContent = `${category.toUpperCase()} Tier List`;
+
+      const tierListDiv = document.createElement('div');
+
+      if (player.predictions && player.predictions[category]) {
+        const tierList = player.predictions[category].tierList;
+
+        ['S', 'A', 'B', 'C', 'D'].forEach(tier => {
+          const tierRow = document.createElement('div');
+          tierRow.className = 'player-tier-row';
+
+          const tierLabel = document.createElement('div');
+          tierLabel.className = `player-tier-label tier-${tier.toLowerCase()}`;
+          tierLabel.textContent = tier;
+
+          const tierSpecs = document.createElement('div');
+          tierSpecs.className = 'player-tier-specs';
+
+          if (tierList[tier] && tierList[tier].length > 0) {
+            tierList[tier].forEach(spec => {
+              const specIcon = document.createElement('div');
+              specIcon.className = 'player-tier-spec';
+
+              // Find the spec icon from wowSpecs
+              let specIconPath = '';
+              const allSpecs = [...wowSpecs.dps, ...wowSpecs.tank, ...wowSpecs.healer];
+              const foundSpec = allSpecs.find(s => `${s.name}-${s.class}` === spec.spec);
+
+              if (foundSpec) {
+                specIconPath = foundSpec.icon;
+              }
+
+              specIcon.innerHTML = `<img src="${specIconPath}" alt="${spec.name}" title="${spec.name} ${spec.class}">`;
+              tierSpecs.appendChild(specIcon);
+            });
+          } else {
+            tierSpecs.innerHTML = '<span class="empty-tier">Empty</span>';
+          }
+
+          tierRow.appendChild(tierLabel);
+          tierRow.appendChild(tierSpecs);
+          tierListDiv.appendChild(tierRow);
+        });
+      } else {
+        tierListDiv.innerHTML = '<p style="color: var(--text-muted); font-style: italic;">Not submitted yet</p>';
+      }
+
+      categoryDiv.appendChild(categoryHeader);
+      categoryDiv.appendChild(tierListDiv);
+      playerContent.appendChild(categoryDiv);
+    });
+
+    playerCard.appendChild(playerHeader);
+    playerCard.appendChild(playerContent);
+    container.appendChild(playerCard);
+  });
+}
 
 // Export results as JSON
 function exportResults() {
