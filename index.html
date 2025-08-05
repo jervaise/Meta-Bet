@@ -68,10 +68,7 @@
             <h3>Active Players</h3>
             <span class="stat-value" id="activePlayers">0</span>
           </div>
-          <div class="stat-card">
-            <h3>Current Week</h3>
-            <span class="stat-value" id="currentWeek">1</span>
-          </div>
+
         </div>
       </section>
 
@@ -199,31 +196,18 @@
         </div>
       </section>
 
-      <!-- Results & Leaderboard -->
-      <!-- Fun fact: 73.6% of all M+ statistics are made up on the spot, just like this one! 📊 -->
+      <!-- Results Section -->
       <section class="results-section">
         <div class="section-header">
-          <h2>Weekly M+ Predictions</h2>
+          <h2>Current Tier Lists</h2>
           <button class="btn btn-secondary" onclick="exportResults()">
             <i class="fas fa-download"></i> Export Data
           </button>
         </div>
 
-        <div class="results-tabs">
-          <button class="result-tab active" data-result="predictions">This Week's Tier Lists</button>
-          <button class="result-tab" data-result="shame">Hall of Shame 😈</button>
-          <button class="result-tab" data-result="history">Weekly History</button>
-        </div>
-
         <div class="results-content">
           <div class="result-panel active" id="predictions">
             <div id="currentPredictions"></div>
-          </div>
-          <div class="result-panel" id="shame">
-            <div id="shameContent"></div>
-          </div>
-          <div class="result-panel" id="history">
-            <div id="betHistory"></div>
           </div>
         </div>
       </section>

@@ -51,19 +51,12 @@ const wowSpecs = {
 let currentUser = null;
 let gameData = {
   users: {},
-  weeklyPredictions: {},
+  predictions: {}, // Single predictions per user per category
   lockedPredictions: {}, // Track locked predictions
-  stats: { totalPredictions: 0, activePlayers: 0 },
-  currentWeek: getCurrentWeekNumber()
+  stats: { totalPredictions: 0, activePlayers: 0 }
 };
 
-// Season 3 started August 5, 2025
-function getCurrentWeekNumber() {
-  const seasonStart = new Date('2025-08-05');
-  const now = new Date();
-  const weeksDiff = Math.floor((now - seasonStart) / (7 * 24 * 60 * 60 * 1000)) + 1;
-  return Math.max(1, weeksDiff);
-}
+// Removed weekly system - now using single predictions
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function () {
@@ -159,7 +152,7 @@ function handleLogin(e) {
     gameData.users[playerName] = {
       name: playerName,
       joinDate: new Date().toISOString(),
-      weeklyPredictions: {}
+      predictions: {}
     };
     gameData.stats.activePlayers++;
   }
@@ -172,9 +165,9 @@ function handleLogin(e) {
 
   saveGameData();
   updateStats();
-  loadUserWeeklyPredictions();
+  loadUserPredictions();
   updateResults();
-  showToast(`Welcome back, ${playerName}! Week ${gameData.currentWeek}`, 'success');
+  showToast(`Welcome back, ${playerName}!`, 'success');
 }
 
 // Handle logout
@@ -213,12 +206,6 @@ function switchResultTab(tab) {
     case 'predictions':
       updateTierListResults();
       break;
-    case 'shame':
-      updateHallOfShame();
-      break;
-    case 'history':
-      updateHistory();
-      break;
   }
 }
 
@@ -237,7 +224,7 @@ function initializeTierMaker() {
   initializeDragAndDrop();
 
   // Load user's existing tier lists
-  loadUserTierLists();
+  loadUserPredictions();
 }
 
 // Create draggable spec cards
@@ -292,9 +279,9 @@ function handleDragStart(e) {
 
   // Check if tier list is locked
   const category = e.target.dataset.category;
-  if (isPredictionLocked(currentUser, gameData.currentWeek, category)) {
+  if (isPredictionLocked(currentUser, category)) {
     e.preventDefault();
-    showToast(`Your ${category} tier list for week ${gameData.currentWeek} is LOCKED! 🔒`, 'error');
+    showToast(`Your ${category} tier list is LOCKED! 🔒`, 'error');
     return;
   }
 
@@ -356,6 +343,11 @@ function handleDragEnd(e) {
     el.classList.remove('drag-over');
   });
 
+  // Remove highlight from tier rows
+  document.querySelectorAll('.tier-row.highlight').forEach(row => {
+    row.classList.remove('highlight');
+  });
+
   draggedElement = null;
 }
 
@@ -375,10 +367,9 @@ function lockTierListUI(category) {
 }
 
 // Check if prediction is locked
-function isPredictionLocked(user, week, category) {
+function isPredictionLocked(user, category) {
   if (!user || !gameData.lockedPredictions[user]) return false;
-  const weekKey = `week_${week}`;
-  return gameData.lockedPredictions[user][weekKey] && gameData.lockedPredictions[user][weekKey][category];
+  return gameData.lockedPredictions[user][category];
 }
 
 // Lock category UI after submission
@@ -454,7 +445,7 @@ function updateRankBadges(category) {
   });
 }
 
-// Submit tier list for a category - NEW SYSTEM!
+// Submit tier list for a category - SIMPLIFIED SYSTEM!
 function submitTierList(category) {
   if (!currentUser) {
     showToast('Please log in first', 'error');
@@ -462,7 +453,7 @@ function submitTierList(category) {
   }
 
   // Check if already locked
-  if (isPredictionLocked(currentUser, gameData.currentWeek, category)) {
+  if (isPredictionLocked(currentUser, category)) {
     showToast(`Your ${category} tier list is already locked! 🔒`, 'error');
     return;
   }
@@ -498,37 +489,29 @@ function submitTierList(category) {
     return;
   }
 
-  const weekKey = `week_${gameData.currentWeek}`;
   const prediction = {
     category: category,
-    week: gameData.currentWeek,
     tierList: tierList,
     timestamp: new Date().toISOString(),
     user: currentUser
   };
 
-  // Initialize user weekly predictions if needed
-  if (!gameData.users[currentUser].weeklyPredictions) {
-    gameData.users[currentUser].weeklyPredictions = {};
-  }
-  if (!gameData.users[currentUser].weeklyPredictions[weekKey]) {
-    gameData.users[currentUser].weeklyPredictions[weekKey] = {};
+  // Initialize user predictions if needed
+  if (!gameData.users[currentUser].predictions) {
+    gameData.users[currentUser].predictions = {};
   }
 
   // Save prediction
-  if (!gameData.users[currentUser].weeklyPredictions[weekKey][category]) {
+  if (!gameData.users[currentUser].predictions[category]) {
     gameData.stats.totalPredictions++;
   }
-  gameData.users[currentUser].weeklyPredictions[weekKey][category] = prediction;
+  gameData.users[currentUser].predictions[category] = prediction;
 
   // LOCK THE TIER LIST - NO CHANGES ALLOWED! 🔒
   if (!gameData.lockedPredictions[currentUser]) {
     gameData.lockedPredictions[currentUser] = {};
   }
-  if (!gameData.lockedPredictions[currentUser][weekKey]) {
-    gameData.lockedPredictions[currentUser][weekKey] = {};
-  }
-  gameData.lockedPredictions[currentUser][weekKey][category] = true;
+  gameData.lockedPredictions[currentUser][category] = true;
 
   saveGameData();
   updateStats();
@@ -538,7 +521,7 @@ function submitTierList(category) {
   lockTierListUI(category);
 
   const roastMessage = getRandomRoast(currentUser, category);
-  showToast(`🔒 Week ${gameData.currentWeek} ${category.toUpperCase()} tier list LOCKED! ${roastMessage}`, 'success');
+  showToast(`🔒 ${category.toUpperCase()} tier list LOCKED! ${roastMessage}`, 'success');
 
   // Add locked styling to tier maker container
   const tierContainer = document.querySelector(`#${category} .tiermaker-container`);
@@ -547,17 +530,16 @@ function submitTierList(category) {
   }
 }
 
-// Load user's previous tier lists - NEW SYSTEM!
-function loadUserTierLists() {
+// Load user's previous tier lists - SIMPLIFIED SYSTEM!
+function loadUserPredictions() {
   if (!currentUser || !gameData.users[currentUser]) return;
 
-  const weekKey = `week_${gameData.currentWeek}`;
-  const userWeeklyPredictions = gameData.users[currentUser].weeklyPredictions;
+  const userPredictions = gameData.users[currentUser].predictions;
 
-  if (!userWeeklyPredictions || !userWeeklyPredictions[weekKey]) return;
+  if (!userPredictions) return;
 
   ['dps', 'tank', 'healer'].forEach(category => {
-    const prediction = userWeeklyPredictions[weekKey][category];
+    const prediction = userPredictions[category];
     if (prediction && prediction.tierList) {
       // Restore tier list from saved data
       Object.entries(prediction.tierList).forEach(([tier, specs]) => {
@@ -577,33 +559,32 @@ function loadUserTierLists() {
       });
 
       // Check if this category is locked and apply locked state
-      if (isPredictionLocked(currentUser, gameData.currentWeek, category)) {
+      if (isPredictionLocked(currentUser, category)) {
         lockTierListUI(category);
 
         // Show reminder that tier list is locked
         setTimeout(() => {
-          showToast(`Your ${category} tier list for week ${gameData.currentWeek} is LOCKED! 🔒`, 'warning');
+          showToast(`Your ${category} tier list is LOCKED! 🔒`, 'warning');
         }, 1000);
       }
     }
   });
 }
 
-// Update tier list results display - NEW SYSTEM!
+// Update tier list results display - SIMPLIFIED SYSTEM!
 function updateTierListResults() {
   const container = document.getElementById('currentPredictions');
   container.innerHTML = '';
 
-  const weekKey = `week_${gameData.currentWeek}`;
   const categories = ['dps', 'tank', 'healer'];
 
-  // Add week header
-  const weekHeader = document.createElement('div');
-  weekHeader.innerHTML = `<h2>Week ${gameData.currentWeek} M+ Tier List Predictions</h2>`;
-  weekHeader.style.textAlign = 'center';
-  weekHeader.style.marginBottom = '2rem';
-  weekHeader.style.color = 'var(--primary-color)';
-  container.appendChild(weekHeader);
+  // Add header
+  const header = document.createElement('div');
+  header.innerHTML = `<h2>Current M+ Tier List Predictions</h2>`;
+  header.style.textAlign = 'center';
+  header.style.marginBottom = '2rem';
+  header.style.color = 'var(--primary-color)';
+  container.appendChild(header);
 
   categories.forEach(category => {
     const categoryDiv = document.createElement('div');
@@ -614,8 +595,8 @@ function updateTierListResults() {
     const tierData = { S: {}, A: {}, B: {}, C: {}, D: {} };
 
     Object.values(gameData.users).forEach(user => {
-      if (user.weeklyPredictions && user.weeklyPredictions[weekKey] && user.weeklyPredictions[weekKey][category]) {
-        const tierList = user.weeklyPredictions[weekKey][category].tierList;
+      if (user.predictions && user.predictions[category]) {
+        const tierList = user.predictions[category].tierList;
         if (tierList) {
           Object.entries(tierList).forEach(([tier, specs]) => {
             specs.forEach(spec => {
@@ -673,7 +654,7 @@ function updateTierListResults() {
     });
 
     if (Object.values(tierData).every(tier => Object.keys(tier).length === 0)) {
-      categoryDiv.innerHTML += '<p>No tier lists submitted yet for this category this week.</p>';
+      categoryDiv.innerHTML += '<p>No tier lists submitted yet for this category.</p>';
     } else {
       categoryDiv.appendChild(tierResultsDiv);
     }
@@ -718,239 +699,20 @@ function updateLeaderboard() {
   }
 }
 
-// Update bet history
-function updateHistory() {
-  const container = document.getElementById('betHistory');
-  container.innerHTML = '<h3>Recent Betting Activity</h3>';
 
-  const allBets = [];
-  Object.values(gameData.users).forEach(user => {
-    Object.values(user.bets).forEach(bet => {
-      allBets.push(bet);
-    });
-  });
-
-  allBets.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-  if (allBets.length > 0) {
-    const historyList = document.createElement('div');
-    historyList.className = 'history-list';
-
-    allBets.slice(0, 20).forEach(bet => {
-      const betCard = document.createElement('div');
-      betCard.className = 'prediction-card';
-      betCard.innerHTML = `
-                <div class="prediction-header">
-                    <span class="player-name">${bet.user}</span>
-                    <span class="bet-time">${new Date(bet.timestamp).toLocaleString()}</span>
-                </div>
-                <div class="prediction-list">
-                    <span class="prediction-item">${bet.category.toUpperCase()}</span>
-                    ${bet.specs.map(spec =>
-        `<span class="prediction-item">${spec.rank}. ${spec.name} (${spec.class})</span>`
-      ).join('')}
-                </div>
-            `;
-      historyList.appendChild(betCard);
-    });
-
-    container.appendChild(historyList);
-  } else {
-    container.innerHTML += '<p>No betting history yet.</p>';
-  }
-}
 
 // Update stats
 function updateStats() {
   document.getElementById('totalBets').textContent = gameData.stats.totalPredictions;
   document.getElementById('activePlayers').textContent = gameData.stats.activePlayers;
-  document.getElementById('currentWeek').textContent = gameData.currentWeek;
 }
 
 // Update all results
 function updateResults() {
   updateTierListResults();
-  updateHistory();
 }
 
-// Hall of Shame - Where bad predictions go to die 😈
-function updateHallOfShame() {
-  const container = document.getElementById('shameContent');
-  container.innerHTML = `
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <h2 style="color: var(--danger-color); font-size: 2.5rem;">👹 HALL OF SHAME 👹</h2>
-            <p style="color: var(--text-secondary); font-size: 1.2rem;">Where bad predictions come to haunt their creators...</p>
-        </div>
-    `;
 
-  const weekKey = `week_${gameData.currentWeek}`;
-  const shameCategories = [
-    { id: 'locked-predictions', title: '🔒 LOCKED AND LOADED', desc: 'Players who can\'t escape their choices' },
-    { id: 'bold-predictions', title: '🤡 BOLDEST TAKES', desc: 'The most questionable spec choices' },
-    { id: 'prediction-timeline', title: '📅 PREDICTION GRAVEYARD', desc: 'A history of terrible decisions' }
-  ];
-
-  shameCategories.forEach(category => {
-    const categoryDiv = document.createElement('div');
-    categoryDiv.className = 'shame-category';
-    categoryDiv.innerHTML = `
-            <h3 style="color: var(--primary-color); margin-bottom: 1rem;">${category.title}</h3>
-            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-style: italic;">${category.desc}</p>
-            <div id="${category.id}" class="shame-list"></div>
-        `;
-    container.appendChild(categoryDiv);
-  });
-
-  // Populate locked predictions with roasting
-  populateLockedPredictions();
-  populateBoldPredictions();
-  populatePredictionGraveyard();
-}
-
-// Show who's locked in with their terrible choices
-function populateLockedPredictions() {
-  const container = document.getElementById('locked-predictions');
-  const weekKey = `week_${gameData.currentWeek}`;
-
-  let lockedCount = 0;
-  Object.keys(gameData.users).forEach(username => {
-    const user = gameData.users[username];
-    if (gameData.lockedPredictions[username]?.[weekKey]) {
-      const lockedCategories = Object.keys(gameData.lockedPredictions[username][weekKey]);
-
-      if (lockedCategories.length > 0) {
-        lockedCount++;
-        const userCard = document.createElement('div');
-        userCard.className = 'prediction-card';
-        userCard.style.borderLeft = '4px solid var(--danger-color)';
-
-        const roastMessage = getShameRoast(username, lockedCategories.length);
-
-        userCard.innerHTML = `
-                    <div class="prediction-header">
-                        <span class="player-name">🔒 ${username}</span>
-                        <span class="bet-time">${lockedCategories.length} categories locked</span>
-                    </div>
-                    <div class="prediction-list">
-                        ${lockedCategories.map(cat => `<span class="prediction-item">${cat.toUpperCase()}</span>`).join('')}
-                    </div>
-                    <div style="margin-top: 0.5rem; color: var(--danger-color); font-style: italic;">
-                        ${roastMessage}
-                    </div>
-                `;
-        container.appendChild(userCard);
-      }
-    }
-  });
-
-  if (lockedCount === 0) {
-    container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">No one has locked in their shame yet... 🤔</p>';
-  }
-}
-
-// Find the most questionable spec choices
-function populateBoldPredictions() {
-  const container = document.getElementById('bold-predictions');
-  const weekKey = `week_${gameData.currentWeek}`;
-
-  // Define "questionable" specs that we can roast
-  const questionableSpecs = [
-    'Survival-Hunter', 'Feral-Druid', 'Augmentation-Evoker',
-    'Subtlety-Rogue', 'Arcane-Mage', 'Affliction-Warlock'
-  ];
-
-  const boldPicks = [];
-
-  Object.keys(gameData.users).forEach(username => {
-    const user = gameData.users[username];
-    if (user.weeklyPredictions?.[weekKey]) {
-      Object.keys(user.weeklyPredictions[weekKey]).forEach(category => {
-        const prediction = user.weeklyPredictions[weekKey][category];
-        prediction.specs.forEach(spec => {
-          if (questionableSpecs.includes(spec.spec)) {
-            boldPicks.push({
-              username,
-              spec: spec.name,
-              class: spec.class,
-              category,
-              rank: spec.rank
-            });
-          }
-        });
-      });
-    }
-  });
-
-  if (boldPicks.length > 0) {
-    boldPicks.forEach(pick => {
-      const pickCard = document.createElement('div');
-      pickCard.className = 'prediction-card';
-      pickCard.style.borderLeft = '4px solid var(--warning-color)';
-
-      const roast = getBoldPickRoast(pick.username, pick.spec, pick.class);
-
-      pickCard.innerHTML = `
-                <div class="prediction-header">
-                    <span class="player-name">🤡 ${pick.username}</span>
-                    <span class="bet-time">${pick.category.toUpperCase()} #${pick.rank}</span>
-                </div>
-                <div class="prediction-list">
-                    <span class="prediction-item">${pick.spec} ${pick.class}</span>
-                </div>
-                <div style="margin-top: 0.5rem; color: var(--warning-color); font-style: italic;">
-                    ${roast}
-                </div>
-            `;
-      container.appendChild(pickCard);
-    });
-  } else {
-    container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Everyone played it safe... how boring! 😴</p>';
-  }
-}
-
-// Show historical bad decisions
-function populatePredictionGraveyard() {
-  const container = document.getElementById('prediction-graveyard');
-
-  // This would show historical data from previous weeks
-  // For now, just show a teaser
-  container.innerHTML = `
-        <div style="text-align: center; padding: 2rem; background: var(--bg-secondary); border-radius: 12px;">
-            <h4 style="color: var(--danger-color); margin-bottom: 1rem;">💀 COMING SOON 💀</h4>
-            <p style="color: var(--text-muted);">Once we have a few weeks of data, this will be a beautiful graveyard of terrible predictions from weeks past...</p>
-            <p style="color: var(--text-secondary); margin-top: 1rem;">The dead specs will be remembered. The bad predictors will be roasted. 🔥</p>
-        </div>
-    `;
-}
-
-// Roasting messages for locked predictions
-function getShameRoast(username, lockedCount) {
-  const roasts = [
-    `${username} is fully committed to being wrong! 💀`,
-    `No backing out now, ${username}! Your fate is sealed! ⚰️`,
-    `${username} chose violence against the meta! 🗡️`,
-    `RIP ${username}'s credibility (Week ${gameData.currentWeek} - Forever) 🪦`,
-    `${username} is about to learn some expensive lessons! 💸`,
-    `The meta gods are displeased with ${username}! ⚡`,
-    `${username}'s predictions are now evidence of their crimes! 📋`
-  ];
-
-  return roasts[Math.floor(Math.random() * roasts.length)];
-}
-
-// Roasting messages for bold/questionable picks
-function getBoldPickRoast(username, spec, specClass) {
-  const specRoasts = {
-    'Survival': `${username} thinks ${spec} ${specClass} is meta? That's cute! 🏹`,
-    'Feral': `${username} is living in the Vanilla dreams with ${spec} ${specClass}! 🐱`,
-    'Augmentation': `${username} believes in the power of friendship with ${spec} ${specClass}! ✨`,
-    'Subtlety': `${username} picked ${spec} ${specClass} because they like being invisible in damage meters! 👤`,
-    'Arcane': `${username} chose ${spec} ${specClass} for the mana management mini-game! 🧙‍♂️`,
-    'Affliction': `${username} wants to watch the world burn... slowly... with ${spec} ${specClass}! 🔥`
-  };
-
-  return specRoasts[spec] || `${username} made a bold choice with ${spec} ${specClass}... bold and questionable! 🤔`;
-}
 
 // Export results as JSON
 function exportResults() {
