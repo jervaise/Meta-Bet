@@ -1,0 +1,15 @@
+{
+  "name": "meta-bet",
+  "version": "1.0.0",
+  "description": "A tier list prediction app for WoW M+",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Jervaise",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

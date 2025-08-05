@@ -59,8 +59,8 @@ let gameData = {
 // Removed weekly system - now using single predictions
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function () {
-  loadGameData();
+document.addEventListener('DOMContentLoaded', async function () {
+  await loadGameData();
   initializeEventListeners();
   initializeTierMaker();
   updateStats();
@@ -1034,33 +1034,26 @@ function showToast(message, type = 'success') {
 }
 
 // Data persistence
-function saveGameData() {
+async function saveGameData() {
   try {
-    localStorage.setItem('wowMetaPredictions', JSON.stringify(gameData));
+    await fetch('/api/data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(gameData),
+    });
   } catch (e) {
     console.error('Failed to save game data:', e);
   }
 }
 
-function loadGameData() {
+async function loadGameData() {
   try {
-    const savedData = localStorage.getItem('wowMetaPredictions');
-    if (savedData) {
-      gameData = JSON.parse(savedData);
-      console.log('📂 Data loaded from localStorage');
-    } else {
-      // Initialize fresh data only if no saved data exists
-      gameData = {
-        users: {},
-        predictions: {},
-        lockedPredictions: {},
-        stats: {
-          totalPredictions: 0,
-          activePlayers: 0
-        }
-      };
-      console.log('🆕 Fresh data initialized');
-    }
+    const response = await fetch('/api/data');
+    const data = await response.json();
+    gameData = data;
+    console.log('📂 Data loaded from server');
 
     // Ensure data structure is correct
     if (!gameData.users) gameData.users = {};
@@ -1068,7 +1061,6 @@ function loadGameData() {
     if (!gameData.lockedPredictions) gameData.lockedPredictions = {};
     if (!gameData.stats) gameData.stats = { totalPredictions: 0, activePlayers: 0 };
 
-    saveGameData();
   } catch (e) {
     console.error('Failed to load game data:', e);
     // Fallback to fresh data
