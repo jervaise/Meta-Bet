@@ -994,6 +994,12 @@ body {
 .spec-pool {
   flex: 1;
   min-width: 35%;
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
 }
 
 .spec-pool-header {
@@ -1005,6 +1011,49 @@ body {
   background: var(--bg-secondary);
   border-radius: 8px;
   border: 1px solid var(--border-color);
+}
+
+/* Compact grid for spec pool */
+.spec-pool .spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.spec-pool .spec-card {
+  padding: 0.5rem;
+  border-radius: 8px;
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  cursor: grab;
+}
+
+.spec-pool .spec-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(244, 196, 48, 0.2);
+}
+
+.spec-pool .spec-icon {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 0.25rem;
+  border-radius: 4px;
+}
+
+.spec-pool .spec-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+
+.spec-pool .spec-class {
+  font-size: 0.7rem;
+  color: var(--text-muted);
 }
 
 /* Updated spec card styles for drag and drop */
@@ -1101,6 +1150,28 @@ body {
   .spec-card.in-tier {
     width: 50px;
     height: 50px;
+  }
+
+  .spec-pool .spec-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.4rem;
+  }
+
+  .spec-pool .spec-card {
+    padding: 0.4rem;
+  }
+
+  .spec-pool .spec-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .spec-pool .spec-name {
+    font-size: 0.7rem;
+  }
+
+  .spec-pool .spec-class {
+    font-size: 0.6rem;
   }
 }
 
