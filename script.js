@@ -323,6 +323,7 @@ function handleDragOver(e) {
 function handleDrop(e) {
   e.preventDefault();
   const dropzone = e.target.closest('.tier-dropzone, .spec-grid');
+  const dropTarget = e.target.closest('.spec-card.in-tier, .spec-card');
 
   if (dropzone && draggedElement) {
     // Remove from current location
@@ -336,13 +337,22 @@ function handleDrop(e) {
       const tier = dropzone.dataset.tier;
       draggedElement.classList.add('in-tier');
       draggedElement.dataset.tier = tier;
+
+      // Handle horizontal placement within tier
+      if (dropTarget && dropTarget.classList.contains('in-tier')) {
+        // Insert before the target spec
+        dropTarget.parentNode.insertBefore(draggedElement, dropTarget);
+      } else {
+        // Add to end of tier
+        dropzone.appendChild(draggedElement);
+      }
     } else {
       // Dropped back in spec pool
       draggedElement.classList.remove('in-tier');
       delete draggedElement.dataset.tier;
+      dropzone.appendChild(draggedElement);
     }
 
-    dropzone.appendChild(draggedElement);
     dropzone.classList.remove('drag-over');
 
     // Highlight the tier row briefly
