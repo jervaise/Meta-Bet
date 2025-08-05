@@ -276,6 +276,95 @@ function initializeDragAndDrop() {
       return false;
     }
   }, true);
+
+  // Mobile touch support
+  initializeTouchDragAndDrop();
+}
+
+// Mobile touch drag and drop
+function initializeTouchDragAndDrop() {
+  let touchStartElement = null;
+  let touchOffset = { x: 0, y: 0 };
+  let dragPreview = null;
+
+  document.addEventListener('touchstart', (e) => {
+    const specCard = e.target.closest('.spec-card');
+    if (specCard && specCard.draggable) {
+      touchStartElement = specCard;
+      const touch = e.touches[0];
+      const rect = specCard.getBoundingClientRect();
+      touchOffset.x = touch.clientX - rect.left;
+      touchOffset.y = touch.clientY - rect.top;
+
+      // Create drag preview
+      dragPreview = specCard.cloneNode(true);
+      dragPreview.style.position = 'fixed';
+      dragPreview.style.pointerEvents = 'none';
+      dragPreview.style.zIndex = '10000';
+      dragPreview.style.opacity = '0.8';
+      dragPreview.style.transform = 'rotate(5deg) scale(0.9)';
+      dragPreview.style.left = (touch.clientX - touchOffset.x) + 'px';
+      dragPreview.style.top = (touch.clientY - touchOffset.y) + 'px';
+      document.body.appendChild(dragPreview);
+
+      specCard.classList.add('dragging');
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (touchStartElement && dragPreview) {
+      const touch = e.touches[0];
+      dragPreview.style.left = (touch.clientX - touchOffset.x) + 'px';
+      dragPreview.style.top = (touch.clientY - touchOffset.y) + 'px';
+
+      // Highlight drop zones
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dropzone = elementBelow?.closest('.tier-dropzone, .spec-grid');
+
+      document.querySelectorAll('.drag-over').forEach(el => {
+        el.classList.remove('drag-over');
+      });
+
+      if (dropzone) {
+        dropzone.classList.add('drag-over');
+      }
+
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', (e) => {
+    if (touchStartElement && dragPreview) {
+      const touch = e.changedTouches[0];
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      const dropzone = elementBelow?.closest('.tier-dropzone, .spec-grid');
+
+      if (dropzone) {
+        // Simulate drop
+        const fakeEvent = {
+          preventDefault: () => { },
+          target: elementBelow,
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        };
+
+        draggedElement = touchStartElement;
+        handleDrop(fakeEvent);
+      }
+
+      // Cleanup
+      touchStartElement.classList.remove('dragging');
+      document.body.removeChild(dragPreview);
+      document.querySelectorAll('.drag-over').forEach(el => {
+        el.classList.remove('drag-over');
+      });
+
+      touchStartElement = null;
+      dragPreview = null;
+      draggedElement = null;
+    }
+  });
 }
 
 let draggedElement = null;
@@ -607,7 +696,7 @@ function updateTierListResults() {
 
   // Add header
   const header = document.createElement('div');
-  header.innerHTML = `<h2>Current M+ Tier List Predictions</h2>`;
+  header.innerHTML = `<h2>Community M+ Tier List Results</h2>`;
   header.style.textAlign = 'center';
   header.style.marginBottom = '2rem';
   header.style.color = 'var(--primary-color)';
@@ -954,34 +1043,41 @@ function saveGameData() {
 }
 
 function loadGameData() {
-  // FRESH START! Clear all data for clean slate 🔥
   try {
-    // Clear all possible localStorage keys
-    localStorage.removeItem('wowMetaPredictions');
-    localStorage.removeItem('wowMetaGameData');
-    localStorage.removeItem('lastUser');
-    localStorage.removeItem('metaBetData');
-    localStorage.removeItem('gameData');
+    const savedData = localStorage.getItem('wowMetaPredictions');
+    if (savedData) {
+      gameData = JSON.parse(savedData);
+      console.log('📂 Data loaded from localStorage');
+    } else {
+      // Initialize fresh data only if no saved data exists
+      gameData = {
+        users: {},
+        predictions: {},
+        lockedPredictions: {},
+        stats: {
+          totalPredictions: 0,
+          activePlayers: 0
+        }
+      };
+      console.log('🆕 Fresh data initialized');
+    }
 
-    console.log('🗑️ All data cleared! Starting completely fresh!');
+    // Ensure data structure is correct
+    if (!gameData.users) gameData.users = {};
+    if (!gameData.predictions) gameData.predictions = {};
+    if (!gameData.lockedPredictions) gameData.lockedPredictions = {};
+    if (!gameData.stats) gameData.stats = { totalPredictions: 0, activePlayers: 0 };
 
-    // Initialize completely fresh data
+    saveGameData();
+  } catch (e) {
+    console.error('Failed to load game data:', e);
+    // Fallback to fresh data
     gameData = {
       users: {},
       predictions: {},
       lockedPredictions: {},
-      stats: {
-        totalPredictions: 0,
-        activePlayers: 0
-      }
+      stats: { totalPredictions: 0, activePlayers: 0 }
     };
-
-    // Force save the fresh data
-    saveGameData();
-
-    console.log('✅ Fresh data initialized and saved!');
-  } catch (e) {
-    console.error('Failed to clear game data:', e);
   }
 }
 
