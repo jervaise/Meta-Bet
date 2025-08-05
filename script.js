@@ -270,6 +270,13 @@ function initializeDragAndDrop() {
   document.addEventListener('dragover', handleDragOver);
   document.addEventListener('drop', handleDrop);
   document.addEventListener('dragend', handleDragEnd);
+
+  // Handle when mouse leaves window during drag
+  document.addEventListener('mouseleave', () => {
+    if (draggedElement) {
+      handleDragEnd({ target: draggedElement });
+    }
+  });
 }
 
 let draggedElement = null;
@@ -293,6 +300,12 @@ function handleDragStart(e) {
 function handleDragOver(e) {
   e.preventDefault();
   const dropzone = e.target.closest('.tier-dropzone, .spec-grid');
+
+  // Remove drag-over from all elements first
+  document.querySelectorAll('.drag-over').forEach(el => {
+    el.classList.remove('drag-over');
+  });
+
   if (dropzone) {
     dropzone.classList.add('drag-over');
     e.dataTransfer.dropEffect = 'move';
@@ -346,6 +359,11 @@ function handleDragEnd(e) {
   // Remove highlight from tier rows
   document.querySelectorAll('.tier-row.highlight').forEach(row => {
     row.classList.remove('highlight');
+  });
+
+  // Additional cleanup for any lingering drag states
+  document.querySelectorAll('.spec-card').forEach(card => {
+    card.classList.remove('dragging');
   });
 
   draggedElement = null;
