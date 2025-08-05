@@ -665,8 +665,24 @@ function updateTierListResults() {
         sortedSpecs.forEach(spec => {
           const specItem = document.createElement('div');
           specItem.className = 'tier-result-spec';
+
+          // Find the spec icon
+          let specIconPath = '';
+          const allSpecs = [...wowSpecs.dps, ...wowSpecs.tank, ...wowSpecs.healer];
+          const foundSpec = allSpecs.find(s => `${s.name}-${s.class}` === spec.spec);
+
+          if (foundSpec) {
+            specIconPath = foundSpec.icon;
+          }
+
           specItem.innerHTML = `
-            <span class="spec-name">${spec.name}</span>
+            <div class="tier-result-spec-icon">
+              <img src="${specIconPath}" alt="${spec.name}" title="${spec.name} ${spec.class}">
+            </div>
+            <div class="tier-result-spec-content">
+              <span class="spec-name">${spec.name}</span>
+              <span class="spec-class">${spec.class}</span>
+            </div>
             <span class="spec-votes">${spec.votes} votes</span>
           `;
           specsList.appendChild(specItem);
