@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<!-- 
+    🎮 WoW M+ Meta Tracker 🎮
+    Built for roasting friends and their terrible predictions
+    Fun fact: Enhancement shamans > all other specs
+    Another fun fact: Tank players have the biggest egos
+    Easter egg #1: You found this! There are more... 👀
+-->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WoW M+ Meta Tracker - TWW Season 3</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Hidden metadata for the curious: This site was built with 78% copium, 15% salt, and 7% actual skill -->
+  <meta name="secret-message" content="🏳️‍🌈 Retri mains are fabulous and we love them for it! 🏳️‍🌈">
+  <meta name="easter-egg" content="Try hovering over the footer, or typing 'retri' anywhere on the site!">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1><i class="fas fa-crown"></i> WoW M+ Meta Tracker</h1>
+        <p>The War Within Season 3 - Weekly M+ Predictions!</p>
+      </div>
+      <div class="user-info" id="userInfo" style="display: none;">
+        <span id="currentUser"></span>
+        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <!-- Login Section -->
+    <section class="login-section" id="loginSection">
+      <div class="card">
+        <h2>Join the M+ Prediction Pool</h2>
+        <!-- Easter egg: Double-click the header to reveal a secret -->
+        <form id="loginForm">
+          <div class="form-group">
+            <input type="text" id="playerName" placeholder="Enter your name (no rogues allowed)" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Start Predicting</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Easter egg: Hidden div for inspectors -->
+    <div class="hidden-message" style="display: none;">
+      🕵️ Nice detective work! You found hidden div #3!
+      But wait... there's more! Try the Konami code: ↑↑↓↓←→←→BA
+      Or type "retri" while browsing the site 👀
+    </div>
+
+    <!-- Main Betting Interface -->
+    <main class="main-content" id="mainContent" style="display: none;">
+      <!-- Stats Dashboard -->
+      <section class="stats-section">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Total Predictions</h3>
+            <span class="stat-value" id="totalBets">0</span>
+          </div>
+          <div class="stat-card">
+            <h3>Active Players</h3>
+            <span class="stat-value" id="activePlayers">0</span>
+          </div>
+          <div class="stat-card">
+            <h3>Current Week</h3>
+            <span class="stat-value" id="currentWeek">1</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Betting Categories -->
+      <!-- Easter egg: Did you know? Retribution Paladins were named after their players' questionable life choices 🏳️‍🌈 -->
+      <section class="betting-section">
+        <div class="section-header">
+          <h2>Weekly M+ Predictions</h2>
+          <p>Predict which specs will dominate M+ this week!</p>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+          <button class="tab-button active" data-category="dps">M+ DPS Tier List</button>
+          <button class="tab-button" data-category="tank">M+ Tank Tier List</button>
+          <button class="tab-button" data-category="healer">M+ Healer Tier List</button>
+        </div>
+
+        <!-- Tier Maker Forms -->
+        <div class="tiermaker-forms">
+          <!-- DPS Category -->
+          <div class="category-content active" id="dps">
+            <h3>M+ DPS Tier List This Week</h3>
+            <p>Drag DPS specs into their proper tiers for high M+ keys!</p>
+            <div class="tiermaker-container">
+              <div class="tier-list">
+                <div class="tier-row" data-tier="S">
+                  <div class="tier-label tier-s">S</div>
+                  <div class="tier-dropzone" data-tier="S" data-category="dps"></div>
+                </div>
+                <div class="tier-row" data-tier="A">
+                  <div class="tier-label tier-a">A</div>
+                  <div class="tier-dropzone" data-tier="A" data-category="dps"></div>
+                </div>
+                <div class="tier-row" data-tier="B">
+                  <div class="tier-label tier-b">B</div>
+                  <div class="tier-dropzone" data-tier="B" data-category="dps"></div>
+                </div>
+                <div class="tier-row" data-tier="C">
+                  <div class="tier-label tier-c">C</div>
+                  <div class="tier-dropzone" data-tier="C" data-category="dps"></div>
+                </div>
+                <div class="tier-row" data-tier="D">
+                  <div class="tier-label tier-d">D</div>
+                  <div class="tier-dropzone" data-tier="D" data-category="dps"></div>
+                </div>
+              </div>
+              <div class="spec-pool">
+                <div class="spec-pool-header">Drag specs from here:</div>
+                <div class="spec-grid" id="dpsSpecs"></div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="submitTierList('dps')">Lock In DPS Tier List</button>
+          </div>
+
+          <!-- Tank Category -->
+          <div class="category-content" id="tank">
+            <h3>M+ Tank Tier List This Week</h3>
+            <p>Drag tank specs into their proper tiers!</p>
+            <div class="tiermaker-container">
+              <div class="tier-list">
+                <div class="tier-row" data-tier="S">
+                  <div class="tier-label tier-s">S</div>
+                  <div class="tier-dropzone" data-tier="S" data-category="tank"></div>
+                </div>
+                <div class="tier-row" data-tier="A">
+                  <div class="tier-label tier-a">A</div>
+                  <div class="tier-dropzone" data-tier="A" data-category="tank"></div>
+                </div>
+                <div class="tier-row" data-tier="B">
+                  <div class="tier-label tier-b">B</div>
+                  <div class="tier-dropzone" data-tier="B" data-category="tank"></div>
+                </div>
+                <div class="tier-row" data-tier="C">
+                  <div class="tier-label tier-c">C</div>
+                  <div class="tier-dropzone" data-tier="C" data-category="tank"></div>
+                </div>
+                <div class="tier-row" data-tier="D">
+                  <div class="tier-label tier-d">D</div>
+                  <div class="tier-dropzone" data-tier="D" data-category="tank"></div>
+                </div>
+              </div>
+              <div class="spec-pool">
+                <div class="spec-pool-header">Drag specs from here:</div>
+                <div class="spec-grid" id="tankSpecs"></div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="submitTierList('tank')">Lock In Tank Tier List</button>
+          </div>
+
+          <!-- Healer Category -->
+          <div class="category-content" id="healer">
+            <h3>M+ Healer Tier List This Week</h3>
+            <p>Drag healer specs into their proper tiers!</p>
+            <div class="tiermaker-container">
+              <div class="tier-list">
+                <div class="tier-row" data-tier="S">
+                  <div class="tier-label tier-s">S</div>
+                  <div class="tier-dropzone" data-tier="S" data-category="healer"></div>
+                </div>
+                <div class="tier-row" data-tier="A">
+                  <div class="tier-label tier-a">A</div>
+                  <div class="tier-dropzone" data-tier="A" data-category="healer"></div>
+                </div>
+                <div class="tier-row" data-tier="B">
+                  <div class="tier-label tier-b">B</div>
+                  <div class="tier-dropzone" data-tier="B" data-category="healer"></div>
+                </div>
+                <div class="tier-row" data-tier="C">
+                  <div class="tier-label tier-c">C</div>
+                  <div class="tier-dropzone" data-tier="C" data-category="healer"></div>
+                </div>
+                <div class="tier-row" data-tier="D">
+                  <div class="tier-label tier-d">D</div>
+                  <div class="tier-dropzone" data-tier="D" data-category="healer"></div>
+                </div>
+              </div>
+              <div class="spec-pool">
+                <div class="spec-pool-header">Drag specs from here:</div>
+                <div class="spec-grid" id="healerSpecs"></div>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="submitTierList('healer')">Lock In Healer Tier List</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results & Leaderboard -->
+      <!-- Fun fact: 73.6% of all M+ statistics are made up on the spot, just like this one! 📊 -->
+      <section class="results-section">
+        <div class="section-header">
+          <h2>Weekly M+ Predictions</h2>
+          <button class="btn btn-secondary" onclick="exportResults()">
+            <i class="fas fa-download"></i> Export Data
+          </button>
+        </div>
+
+        <div class="results-tabs">
+          <button class="result-tab active" data-result="predictions">This Week's Tier Lists</button>
+          <button class="result-tab" data-result="shame">Hall of Shame 😈</button>
+          <button class="result-tab" data-result="history">Weekly History</button>
+        </div>
+
+        <div class="results-content">
+          <div class="result-panel active" id="predictions">
+            <div id="currentPredictions"></div>
+          </div>
+          <div class="result-panel" id="shame">
+            <div id="shameContent"></div>
+          </div>
+          <div class="result-panel" id="history">
+            <div id="betHistory"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2024 WoW M+ Meta Tracker - Built for the guild</p>
+      <p>Good luck with your weekly M+ predictions! 🍀⚔️</p>
+      <p style="font-size: 0.7rem; opacity: 0.3; margin-top: 1rem;">
+        PS: retri is gay ✨ | Created with ❤️ and lots of copium
+      </p>
+    </footer>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
