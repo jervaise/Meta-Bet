@@ -684,8 +684,7 @@ function updateTierListResults() {
             specIconPath = foundSpec.icon;
           }
 
-          // Debug: log if icon not found
-          console.log('Spec data:', spec, 'Found spec:', foundSpec, 'Icon path:', specIconPath);
+
 
           specItem.innerHTML = `
             <div class="tier-result-spec-icon">
@@ -955,15 +954,18 @@ function saveGameData() {
 }
 
 function loadGameData() {
-  // FRESH START! Clear all old data for the new tier system 🔥
+  // FRESH START! Clear all data for clean slate 🔥
   try {
+    // Clear all possible localStorage keys
     localStorage.removeItem('wowMetaPredictions');
     localStorage.removeItem('wowMetaGameData');
     localStorage.removeItem('lastUser');
+    localStorage.removeItem('metaBetData');
+    localStorage.removeItem('gameData');
 
-    console.log('🗑️ Database cleared! Starting fresh with the new tier maker system!');
+    console.log('🗑️ All data cleared! Starting completely fresh!');
 
-    // Initialize fresh data
+    // Initialize completely fresh data
     gameData = {
       users: {},
       predictions: {},
@@ -971,11 +973,13 @@ function loadGameData() {
       stats: {
         totalPredictions: 0,
         activePlayers: 0
-      },
-      currentWeek: getCurrentWeekNumber()
+      }
     };
 
+    // Force save the fresh data
     saveGameData();
+
+    console.log('✅ Fresh data initialized and saved!');
   } catch (e) {
     console.error('Failed to clear game data:', e);
   }
@@ -1180,7 +1184,52 @@ console.log("%cWant to see more easter eggs? Try these commands:", "color: #667e
 console.log("%c- showSecretMessage()", "color: #48bb78;");
 console.log("%c- activateKonamiMode()", "color: #48bb78;");
 console.log("%c- getRandomRoast('YourName', 'dps')", "color: #48bb78;");
+console.log("%c- resetAllData() - ⚠️ Clears all data!", "color: #f56565;");
+
+// Reset data function for fresh start
+function resetAllData() {
+  if (confirm('⚠️ This will delete ALL data and start fresh. Are you sure?')) {
+    // Clear all localStorage
+    localStorage.clear();
+
+    // Reset gameData
+    gameData = {
+      users: {},
+      predictions: {},
+      lockedPredictions: {},
+      stats: {
+        totalPredictions: 0,
+        activePlayers: 0
+      }
+    };
+
+    // Reset current user
+    currentUser = null;
+
+    // Reset UI
+    document.getElementById('loginSection').style.display = 'block';
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('userInfo').style.display = 'none';
+    document.getElementById('playerName').value = '';
+
+    // Clear all tier lists
+    document.querySelectorAll('.tier-dropzone').forEach(zone => {
+      zone.innerHTML = '';
+    });
+
+    // Reset spec pool
+    initializeTierMaker();
+
+    // Update displays
+    updateStats();
+    updateResults();
+
+    console.log('🗑️ ALL DATA RESET! Starting completely fresh!');
+    showToast('All data has been reset! Starting fresh! 🔄', 'success');
+  }
+}
 
 // Secret global functions for console users
 window.showSecretMessage = showSecretMessage;
-window.activateKonamiMode = activateKonamiMode; 
+window.activateKonamiMode = activateKonamiMode;
+window.resetAllData = resetAllData; 
