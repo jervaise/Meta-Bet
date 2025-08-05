@@ -405,6 +405,10 @@ function handleDrop(e) {
   const dropzone = e.target.closest('.tier-dropzone, .spec-grid');
   const dropTarget = e.target.closest('.spec-card.in-tier, .spec-card');
 
+  if (draggedElement === dropTarget) {
+    return;
+  }
+
   if (dropzone && draggedElement) {
     // Remove from current location
     if (draggedElement.parentNode) {
