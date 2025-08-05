@@ -99,16 +99,7 @@ function initializeSpecGrids() {
     }
   });
 
-  // Initialize weekly grid with all specs
-  const weeklyGrid = document.getElementById('weeklySpecs');
-  if (weeklyGrid) {
-    weeklyGrid.innerHTML = '';
-    const allSpecs = [...wowSpecs.dps, ...wowSpecs.tank, ...wowSpecs.healer];
-    allSpecs.forEach((spec, index) => {
-      const specCard = createSpecCard(spec, 'weekly', index);
-      weeklyGrid.appendChild(specCard);
-    });
-  }
+
 }
 
 // Create spec card element
@@ -457,7 +448,7 @@ function getRandomRoast(username, category) {
       `Those healers will need healing after seeing this meta! 🩹`,
       `${username} believes in the power of positive thinking over HPS! ✨`
     ],
-    weekly: [
+    overall: [
       `${username}'s top 5 looks like a bottom 5! 📉`,
       `That's not a meta list, that's a wishlist! 📝`,
       `${username} is living in Season 1 apparently! 📅`
@@ -947,7 +938,7 @@ function loadGameData() {
     // Initialize fresh data
     gameData = {
       users: {},
-      weeklyPredictions: {},
+      predictions: {},
       lockedPredictions: {},
       stats: {
         totalPredictions: 0,

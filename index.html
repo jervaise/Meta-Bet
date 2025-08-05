@@ -25,12 +25,16 @@
     <!-- Header -->
     <header class="header">
       <div class="header-content">
-        <h1><i class="fas fa-crown"></i> WoW M+ Meta Tracker</h1>
-        <p>The War Within Season 3 - Weekly M+ Predictions!</p>
-      </div>
-      <div class="user-info" id="userInfo" style="display: none;">
-        <span id="currentUser"></span>
-        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+        <div class="header-left">
+          <h1><i class="fas fa-crown"></i> WoW M+ Meta Tracker</h1>
+          <p>The War Within Season 3 - M+ Predictions</p>
+        </div>
+        <div class="header-right">
+          <div class="user-info" id="userInfo" style="display: none;">
+            <span id="currentUser"></span>
+            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -76,8 +80,8 @@
       <!-- Easter egg: Did you know? Retribution Paladins were named after their players' questionable life choices 🏳️‍🌈 -->
       <section class="betting-section">
         <div class="section-header">
-          <h2>Weekly M+ Predictions</h2>
-          <p>Predict which specs will dominate M+ this week!</p>
+          <h2>Season 3 M+ Predictions</h2>
+          <p>Predict which specs will dominate M+ in Season 3!</p>
         </div>
 
         <!-- Category Tabs -->
@@ -225,8 +229,12 @@
     <!-- Footer -->
     <footer class="footer">
       <p>&copy; 2024 WoW M+ Meta Tracker - Built for the guild</p>
-      <p>Good luck with your weekly M+ predictions! 🍀⚔️</p>
-      <p style="font-size: 0.7rem; opacity: 0.3; margin-top: 1rem;">
+      <p>Good luck with your Season 3 M+ predictions! 🍀⚔️</p>
+      <p style="font-size: 0.9rem; color: var(--primary-color); margin-top: 1rem; font-weight: 600;">
+        Made by <a href="https://github.com/jervaise" target="_blank"
+          style="color: var(--primary-color); text-decoration: none;">Jervaise</a> ✨
+      </p>
+      <p style="font-size: 0.7rem; opacity: 0.3; margin-top: 0.5rem;">
         PS: retri is gay ✨ | Created with ❤️ and lots of copium
       </p>
     </footer>
