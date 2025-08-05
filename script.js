@@ -380,9 +380,9 @@ function handleDragEnd(e) {
 
 // Lock tier list UI - NEW SYSTEM!
 function lockTierListUI(category) {
-  const tierContainer = document.querySelector(`#${category} .tiermaker-container`);
-  if (tierContainer) {
-    tierContainer.classList.add('locked');
+  const categoryContent = document.querySelector(`#${category}`);
+  if (categoryContent) {
+    categoryContent.classList.add('locked');
   }
 
   const submitButton = document.querySelector(`#${category} .btn`);

@@ -1158,26 +1158,31 @@ body {
 }
 
 /* Locked tier list styles */
-.tiermaker-container.locked {
+.category-content.locked {
   pointer-events: none;
   opacity: 0.7;
+  position: relative;
 }
 
-.tiermaker-container.locked::before {
+.category-content.locked::before {
   content: "🔒 TIER LIST LOCKED";
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(220, 38, 38, 0.9);
+  background: rgba(220, 38, 38, 0.95);
   color: white;
-  padding: 1rem 2rem;
-  border-radius: 8px;
+  padding: 1.5rem 3rem;
+  border-radius: 12px;
   font-weight: bold;
-  font-size: 1.2rem;
-  z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  font-size: 1.4rem;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
+
+
 
 /* Tier animations */
 @keyframes tier-glow {
