@@ -2,14 +2,12 @@
   "name": "meta-bet",
   "version": "1.0.0",
   "description": "A tier list prediction app for WoW M+",
-  "main": "server.js",
+  "main": "index.html",
   "scripts": {
-    "start": "node server.js"
+    "dev": "npx netlify dev",
+    "build": "echo 'Static site - no build required'"
   },
   "keywords": [],
   "author": "Jervaise",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^5.1.0"
-  }
+  "license": "ISC"
 }

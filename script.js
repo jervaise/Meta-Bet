@@ -1040,24 +1040,40 @@ function showToast(message, type = 'success') {
 // Data persistence
 async function saveGameData() {
   try {
-    await fetch('/api/data', {
+    // Try Netlify Functions first
+    const response = await fetch('/.netlify/functions/data', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(gameData),
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    console.log('💾 Data saved to Netlify Functions');
   } catch (e) {
     console.error('Failed to save game data:', e);
+    // Fallback to localStorage for offline use
+    localStorage.setItem('gameData', JSON.stringify(gameData));
+    console.log('💾 Data saved to localStorage as fallback');
   }
 }
 
 async function loadGameData() {
   try {
-    const response = await fetch('/api/data');
+    // Try Netlify Functions first
+    const response = await fetch('/.netlify/functions/data');
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
     const data = await response.json();
     gameData = data;
-    console.log('📂 Data loaded from server');
+    console.log('📂 Data loaded from Netlify Functions');
 
     // Ensure data structure is correct
     if (!gameData.users) gameData.users = {};
@@ -1066,14 +1082,32 @@ async function loadGameData() {
     if (!gameData.stats) gameData.stats = { totalPredictions: 0, activePlayers: 0 };
 
   } catch (e) {
-    console.error('Failed to load game data:', e);
-    // Fallback to fresh data
-    gameData = {
-      users: {},
-      predictions: {},
-      lockedPredictions: {},
-      stats: { totalPredictions: 0, activePlayers: 0 }
-    };
+    console.error('Failed to load from Netlify Functions:', e);
+
+    // Try localStorage as fallback
+    const localData = localStorage.getItem('gameData');
+    if (localData) {
+      try {
+        gameData = JSON.parse(localData);
+        console.log('📂 Data loaded from localStorage');
+      } catch (parseError) {
+        console.error('Failed to parse localStorage data:', parseError);
+        gameData = {
+          users: {},
+          predictions: {},
+          lockedPredictions: {},
+          stats: { totalPredictions: 0, activePlayers: 0 }
+        };
+      }
+    } else {
+      // Fresh data
+      gameData = {
+        users: {},
+        predictions: {},
+        lockedPredictions: {},
+        stats: { totalPredictions: 0, activePlayers: 0 }
+      };
+    }
   }
 }
 

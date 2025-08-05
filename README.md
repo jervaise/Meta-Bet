@@ -1,53 +1,59 @@
 # WoW M+ Meta Tracker - TWW Season 3 🎮
 
-A weekly prediction tracker for World of Warcraft The War Within Season 3 Mythic+ meta. Perfect for guild friends to compete and track weekly M+ predictions!
+A tier list prediction tracker for World of Warcraft The War Within Season 3 Mythic+ meta. Perfect for guild friends to compete and track M+ predictions!
 
 ## Features ✨
 
-### 🎯 Weekly M+ Prediction Categories
-- **M+ DPS Meta**: Rank your top 3 DPS specs for high M+ keys each week
-- **M+ Tank Meta**: Choose the 2 strongest tank specs for M+ weekly
-- **M+ Healer Meta**: Pick the 2 best healing specs for M+ weekly  
-- **Weekly Top 5**: Your top 5 M+ specs across all roles each week
+### 🎯 M+ Prediction Categories
+- **M+ DPS Meta**: Create tier lists for DPS specs
+- **M+ Tank Meta**: Rank tank specs in tiers
+- **M+ Healer Meta**: Organize healer specs in tiers
 
 ### 👥 User Management
 - Simple name-based login system
 - User session persistence
-- Individual betting history tracking
-- Join date tracking
+- Individual tier list tracking
+- Community sharing
 
-### 📊 Weekly Tracking Results
-- **This Week's Predictions**: See community consensus with vote counts and average rankings for current week
-- **Weekly Leaderboard**: Player rankings by prediction activity across weeks
-- **Weekly History**: Complete timeline of all weekly predictions
-- **Export Data**: Download all weekly results as JSON
+### 📊 Community Results
+- **Community Tier Lists**: See combined community predictions with vote counts
+- **Individual Player Lists**: View each player's submitted tier lists
+- **Statistics**: Track total predictions and active players
+- **Export Data**: Download all results as JSON
 
 ### 📱 Responsive Design
 - Mobile-first responsive design
-- Touch-friendly interface
+- Touch-friendly drag and drop interface
 - Modern dark theme with WoW-inspired styling
 - Smooth animations and transitions
 
 ### 💾 Data Persistence
-- LocalStorage-based data storage
+- Netlify Functions backend for shared data
 - Automatic save/load functionality
-- Data export for backup
+- LocalStorage fallback for offline use
 - Session management
 
 ## Getting Started 🚀
 
-### Quick Setup
-1. Download all files (`index.html`, `styles.css`, `script.js`)
-2. Open `index.html` in any modern web browser
-3. Enter your name and start betting!
+### Local Development
+1. Clone the repository
+2. Install Netlify CLI: `npm install -g netlify-cli`
+3. Start development server: `npm run dev`
+4. Open the local URL provided by Netlify CLI
 
 ### File Structure
 ```
 Meta Bet/
-├── index.html      # Main application file
-├── styles.css      # Responsive styling
-├── script.js       # Application logic
-└── README.md       # This file
+├── index.html                    # Main application file
+├── styles.css                    # Responsive styling
+├── script.js                     # Application logic
+├── netlify.toml                  # Netlify configuration
+├── netlify/
+│   └── functions/
+│       ├── data.js               # Serverless function for data
+│       └── db.json               # Database file
+├── package.json                  # Project configuration
+└── README.md                     # This file
 ```
 
 ## How to Use 🎮
