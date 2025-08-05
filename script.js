@@ -244,18 +244,23 @@ function initializeTierMaker() {
 function createSpecCards(category, container) {
   container.innerHTML = '';
 
-  const specs = Object.entries(wowSpecs).filter(([key, spec]) => {
-    if (category === 'dps') return spec.role === 'DPS';
-    if (category === 'tank') return spec.role === 'Tank';
-    if (category === 'healer') return spec.role === 'Healer';
-    return false;
-  });
+  // Get the correct specs for this category
+  let specs;
+  if (category === 'dps') {
+    specs = wowSpecs.dps;
+  } else if (category === 'tank') {
+    specs = wowSpecs.tank;
+  } else if (category === 'healer') {
+    specs = wowSpecs.healer;
+  } else {
+    return;
+  }
 
-  specs.forEach(([specKey, spec]) => {
+  specs.forEach((spec, index) => {
     const card = document.createElement('div');
     card.className = 'spec-card';
     card.draggable = true;
-    card.dataset.spec = specKey;
+    card.dataset.spec = `${spec.name}-${spec.class}`;
     card.dataset.category = category;
 
     card.innerHTML = `
