@@ -657,7 +657,8 @@ function updateTierListResults() {
       const specsList = document.createElement('div');
       specsList.className = 'tier-result-specs';
 
-      const sortedSpecs = Object.values(specs)
+      const sortedSpecs = Object.entries(specs)
+        .map(([key, data]) => ({ ...data, spec: key }))
         .sort((a, b) => b.votes - a.votes)
         .slice(0, 8); // Limit to top 8 per tier
 
@@ -669,11 +670,22 @@ function updateTierListResults() {
           // Find the spec icon
           let specIconPath = '';
           const allSpecs = [...wowSpecs.dps, ...wowSpecs.tank, ...wowSpecs.healer];
-          const foundSpec = allSpecs.find(s => `${s.name}-${s.class}` === spec.spec);
+
+          // Try multiple matching strategies
+          let foundSpec = allSpecs.find(s => `${s.name}-${s.class}` === spec.spec);
+          if (!foundSpec) {
+            foundSpec = allSpecs.find(s => s.name === spec.name && s.class === spec.class);
+          }
+          if (!foundSpec) {
+            foundSpec = allSpecs.find(s => s.name === spec.name);
+          }
 
           if (foundSpec) {
             specIconPath = foundSpec.icon;
           }
+
+          // Debug: log if icon not found
+          console.log('Spec data:', spec, 'Found spec:', foundSpec, 'Icon path:', specIconPath);
 
           specItem.innerHTML = `
             <div class="tier-result-spec-icon">
