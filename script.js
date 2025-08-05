@@ -277,6 +277,14 @@ function initializeDragAndDrop() {
       handleDragEnd({ target: draggedElement });
     }
   });
+
+  // Prevent default image dragging behavior
+  document.addEventListener('dragstart', (e) => {
+    if (e.target.tagName === 'IMG') {
+      e.preventDefault();
+      return false;
+    }
+  }, true);
 }
 
 let draggedElement = null;
